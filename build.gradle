@@ -1,0 +1,45 @@
+plugins {
+	id 'org.springframework.boot' version '2.7.0'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+group = 'com.awsdev'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	compileOnly 'org.projectlombok:lombok:1.18.24'
+	annotationProcessor 'org.projectlombok:lombok:1.18.24'
+	implementation 'org.springframework.cloud:spring-cloud-aws-context:2.2.6.RELEASE'
+	implementation 'org.springframework.cloud:spring-cloud-aws-autoconfigure:2.2.6.RELEASE'
+	implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.837')
+	implementation 'com.amazonaws:aws-java-sdk-ec2'
+	implementation 'com.amazonaws:aws-java-sdk-s3'
+	implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.1'
+	// https://mvnrepository.com/artifact/mysql/mysql-connector-java
+	implementation 'mysql:mysql-connector-java:8.0.29'
+	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-aws-messaging
+	implementation group: 'org.springframework.cloud', name: 'spring-cloud-aws-messaging', version: '2.2.6.RELEASE'
+	// https://mvnrepository.com/artifact/org.springframework.hateoas/spring-hateoas
+	implementation group: 'org.springframework.hateoas', name: 'spring-hateoas', version: '1.5.1'
+	// https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-lambda
+	implementation group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: '1.12.270'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+bootJar {
+	launchScript()
+}
