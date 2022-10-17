@@ -14,11 +14,6 @@ repositories {
 	mavenCentral()
 }
 
-jacoco {
-	toolVersion = "0.8.5"
-	reportsDir = file("$buildDir/jacoco")
-}
-
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -44,16 +39,31 @@ dependencies {
 	implementation 'org.springframework:spring-beans:3.0.5.RELEASE'
 
 }
+//tasks
+jacoco {
+	toolVersion = "0.8.8"
+	reportsDir = file("$buildDir/reports/jacoco")
+}
 
-tasks.named('test') {
+test {
 	useJUnitPlatform()
 	finalizedBy jacocoTestReport
 }
 
-tasks.named('jacocoTestReport') {
-	dependsOn test
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.95
+			}
+		}
+	}
 }
 
 bootJar {
 	launchScript()
 }
+
+check.dependsOn jacocoTestCoverageVerification
