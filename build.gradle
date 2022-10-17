@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.7.0'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+	id 'jacoco'
 }
 
 group = 'com.awsdev'
@@ -11,6 +12,11 @@ sourceCompatibility = '11'
 
 repositories {
 	mavenCentral()
+}
+
+jacoco {
+	toolVersion = "0.8.5"
+	reportsDir = file("$buildDir/jacoco")
 }
 
 dependencies {
@@ -41,6 +47,11 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+tasks.named('jacocoTestReport') {
+	dependsOn test
 }
 
 bootJar {
