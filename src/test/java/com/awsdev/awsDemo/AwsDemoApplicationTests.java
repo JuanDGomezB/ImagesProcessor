@@ -5,4 +5,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class AwsDemoApplicationTests {
+
+    @Test
+    public void contextLoads() {
+    }
 }
