@@ -1,7 +1,7 @@
-package com.awsdev.awsDemo.controller;
+package com.awsdev.awsdemo.controller;
 
-import com.awsdev.awsDemo.models.AwsMetaData;
-import com.awsdev.awsDemo.service.AppService;
+import com.awsdev.awsdemo.models.AwsMetaData;
+import com.awsdev.awsdemo.service.AppService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +18,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * ControllerTest Class.
+ */
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(value = ImagesController.class)
 public class ImagesControllerTest {

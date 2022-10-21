@@ -1,13 +1,15 @@
-package com.awsdev.awsDemo.config;
+package com.awsdev.awsdemo.config;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * RestTemplate configuration Bean.
+ */
 @Configuration
 public class RestTemplateBean {
-
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder.build();
