@@ -23,7 +23,7 @@ import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
-import com.awsdev.awsDemo.controller.Controller;
+import com.awsdev.awsDemo.controller.ImagesController;
 import com.awsdev.awsDemo.models.AwsMetaData;
 import com.awsdev.awsDemo.models.ImageMetaData;
 import com.awsdev.awsDemo.repository.ImagesRepository;
@@ -301,7 +301,7 @@ public class AppServiceImpl implements AppService {
     }
 
     private  String formatMessage(ImageMetaData imageMetaData) {
-        String downloadImageUrl = linkTo(methodOn(Controller.class)
+        String downloadImageUrl = linkTo(methodOn(ImagesController.class)
                 .downloadImage(imageMetaData.getName()))
                 .toString();
         return "New image uploaded:" + "\n"
