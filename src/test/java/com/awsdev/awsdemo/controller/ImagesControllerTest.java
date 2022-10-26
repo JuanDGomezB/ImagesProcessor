@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -70,6 +71,19 @@ public class ImagesControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.multipart("/upload")
                         .file("image", imageFile.getBytes()))
                 .andExpect(status().is(201))
+                .andExpect(content().string(mockResponse));
+    }
+
+    @Test
+    public void deleteImageRequest() throws Exception {
+
+        Mockito.when(appService.deleteImage(any()))
+                .thenReturn("Delete operation completed.");
+
+        var mockResponse = "{\"Operation Status\":\"Delete operation completed.\"}";
+        mockMvc.perform(MockMvcRequestBuilders.delete("/delete")
+                .queryParam("image", anyString()))
+                .andExpect(status().is(200))
                 .andExpect(content().string(mockResponse));
     }
 }
