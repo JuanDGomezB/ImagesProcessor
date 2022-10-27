@@ -39,6 +39,8 @@ dependencies {
 	implementation group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: '1.12.270'
 	// https://mvnrepository.com/artifact/org.springframework/spring-beans
 	//implementation 'org.springframework:spring-beans:3.0.5.RELEASE'
+	// https://mvnrepository.com/artifact/com.google.code.gson/gson
+	implementation 'com.google.code.gson:gson:2.10'
 
 }
 //tasks

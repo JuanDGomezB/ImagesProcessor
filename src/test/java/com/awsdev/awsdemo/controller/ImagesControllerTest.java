@@ -1,7 +1,9 @@
 package com.awsdev.awsdemo.controller;
 
 import com.awsdev.awsdemo.models.AwsMetaData;
+import com.awsdev.awsdemo.models.ImageMetaData;
 import com.awsdev.awsdemo.service.AppService;
+import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +17,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -83,6 +88,58 @@ public class ImagesControllerTest {
         var mockResponse = "{\"Operation Status\":\"Delete operation completed.\"}";
         mockMvc.perform(MockMvcRequestBuilders.delete("/delete")
                 .queryParam("image", anyString()))
+                .andExpect(status().is(200))
+                .andExpect(content().string(mockResponse));
+    }
+
+    @Test
+    public void downloadImageRequest() throws Exception {
+
+        Mockito.when(appService.downloadImage(anyString()))
+                .thenReturn(new byte[0]);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/download")
+                .queryParam("image", anyString()))
+                .andExpect(status().is(200))
+                .andExpect(content().bytes(new byte[0]));
+    }
+
+    @Test
+    public void getAllImagesRequest() throws  Exception {
+        var imageMetaData1 = new ImageMetaData();
+        var imageMetaData2 = new ImageMetaData();
+        var imageMetaDataList = new ArrayList<>(List.of(imageMetaData1, imageMetaData2));
+
+        Mockito.when(appService.getAllImagesMetaData())
+                .thenReturn(imageMetaDataList);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/getAll"))
+                .andExpect(status().is(200))
+                .andExpect(content().json(new Gson().toJson(imageMetaDataList)));
+    }
+
+    @Test
+    public void randomImageMetadataRequest() throws Exception {
+        var imageMetadata = new ImageMetaData();
+        var imagesMetadataList = new ArrayList<>(List.of(imageMetadata));
+
+        Mockito.when(appService.getRandomImageMetaData())
+                .thenReturn(imagesMetadataList);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/random"))
+                .andExpect(status().is(200))
+                .andExpect(content().json(new Gson().toJson(imagesMetadataList)));
+    }
+
+    @Test
+    public void subscribeToSnSTopicRequest() throws Exception {
+        Mockito.when(appService.addSubscriptionToTopic(anyString()))
+                .thenReturn("Successfully subscribed");
+
+        var mockResponse = "{\"Operation\":\"Successfully subscribed\",\"email\":\"123@abc.com\"}";
+        mockMvc.perform(MockMvcRequestBuilders.post("/subscribe")
+                .contentType(MediaType.TEXT_PLAIN)
+                .content("123@abc.com"))
                 .andExpect(status().is(200))
                 .andExpect(content().string(mockResponse));
     }
