@@ -1,10 +1,12 @@
-package com.awsdev.awsDemo.listener;
+package com.awsdev.awsdemo.listener;
 
-import com.awsdev.awsDemo.service.AppService;
+import com.awsdev.awsdemo.service.AppService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * NotificationListener Class.
+ */
 @Component
 @RequiredArgsConstructor
 public class NotificationListener {

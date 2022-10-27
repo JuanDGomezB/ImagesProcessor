@@ -1,16 +1,19 @@
-package com.awsdev.awsDemo.config;
+package com.awsdev.awsdemo.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.AmazonSNSClientBuilder;
+import com.amazonaws.services.sqs.AmazonSQSClient;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+/**
+ * AwsSqs configuration Bean.
+ */
 @Configuration
-public class AwsSnsConfig {
+public class AwsSqsConfig {
 
     @Value("${cloud.aws.region.static}")
     private String region;
@@ -23,8 +26,8 @@ public class AwsSnsConfig {
 
     @Primary
     @Bean
-    public AmazonSNSClient getAwsSnsClient() {
-        return (AmazonSNSClient) AmazonSNSClientBuilder.standard()
+    public AmazonSQSClient getAwsSqsClient() {
+        return (AmazonSQSClient) AmazonSQSClientBuilder.standard()
                 .withRegion(region)
                 .withCredentials(
                         new AWSStaticCredentialsProvider(

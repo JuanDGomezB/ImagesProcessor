@@ -1,7 +1,10 @@
-package com.awsdev.awsDemo.models;
+package com.awsdev.awsdemo.models;
 
 import lombok.Data;
 
+/**
+ * AwsMetaData Model.
+ */
 @Data
 public class AwsMetaData {
   private String region;

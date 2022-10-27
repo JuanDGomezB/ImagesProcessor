@@ -1,15 +1,11 @@
-package com.awsdev.awsDemo.service;
+package com.awsdev.awsdemo.service;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lambda.AWSLambda;
+import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.lambda.model.InvokeResult;
 import com.amazonaws.services.lambda.model.ServiceException;
 import com.amazonaws.services.s3.AmazonS3Client;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
@@ -23,10 +19,10 @@ import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
-import com.awsdev.awsDemo.controller.Controller;
-import com.awsdev.awsDemo.models.AwsMetaData;
-import com.awsdev.awsDemo.models.ImageMetaData;
-import com.awsdev.awsDemo.repository.ImagesRepository;
+import com.awsdev.awsdemo.controller.ImagesController;
+import com.awsdev.awsdemo.models.AwsMetaData;
+import com.awsdev.awsdemo.models.ImageMetaData;
+import com.awsdev.awsdemo.repository.ImagesRepository;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -48,6 +44,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+/**
+ * AppService implementation class.
+ */
 @Service
 @Transactional
 public class AppServiceImpl implements AppService {
@@ -89,25 +91,25 @@ public class AppServiceImpl implements AppService {
     @Value("${lambdaFunctionName}")
     private String lambdaFunctionName;
 
-    Logger LOG = LoggerFactory.getLogger((this.getClass()));
+    Logger log = LoggerFactory.getLogger((this.getClass()));
 
     @Override
     public AwsMetaData ec2Info() {
         String az, region;
-        LOG.info("Received request to obtain ec2 metadata info");
+        log.info("Received request to obtain ec2 metadata info");
         try {
             region = Regions.getCurrentRegion().toString();
-            LOG.info("Requesting ec2 instance current region");
+            log.info("Requesting ec2 instance current region");
         } catch (Exception e) {
-            LOG.error("Error trying to obtain ec2 instance current region", e);
+            log.error("Error trying to obtain ec2 instance current region", e);
             region = "unavailable";
         }
         try {
-            LOG.info("Requesting ec2 instance current az");
+            log.info("Requesting ec2 instance current az");
             az = restTemplate.getForObject(ec2MetaDataUrl, String.class);
         } catch (Exception e) {
-            LOG.error("Error trying to obtain ec2 instance current az", e);
-            az= "unavailable";
+            log.error("Error trying to obtain ec2 instance current az", e);
+            az = "unavailable";
         }
         return new AwsMetaData(region, az);
     }
@@ -127,14 +129,14 @@ public class AppServiceImpl implements AppService {
                 StringUtils.getFilenameExtension(image.getOriginalFilename()),
                 getCurrentTime());
 
-        LOG.info("Received request to upload image to S3 bucket");
+        log.info("Received request to upload image to S3 bucket");
         try {
             awsS3Client.putObject(bucketName,
                     StringUtils.getFilename(image.getOriginalFilename()),
                     image.getInputStream(),
                     metadata);
         } catch (IOException e) {
-            LOG.error("Error uploading image to S3 bucket", e);
+            log.error("Error uploading image to S3 bucket", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error uploading file");
         }
         awsS3Client.setObjectAcl(bucketName,
@@ -144,20 +146,20 @@ public class AppServiceImpl implements AppService {
 
         List<ImageMetaData> imagesMetaData =
                 imagesRepository.findByName(FilenameUtils.removeExtension(fileName));
-        LOG.info("Uploading metadata info to database");
+        log.info("Uploading metadata info to database");
 
 
         if (imagesMetaData.isEmpty()) {
-            LOG.info("Image is new... creating entity");
+            log.info("Image is new... creating entity");
             imagesRepository.save(newImageMetaData);
         } else {
-            LOG.info("Image already exists... updating entity");
+            log.info("Image already exists... updating entity");
             imagesMetaData.stream().forEach(imageMetaData ->
                             imagesRepository.updateDate(imageMetaData.getName(), getCurrentTime())
             );
         }
-        LOG.info("Completed request to upload image to S3 bucket");
-        LOG.info("Sending notification to SQS queue");
+        log.info("Completed request to upload image to S3 bucket");
+        log.info("Sending notification to SQS queue");
         try {
             sendMessageToSqSQueue(formatMessage(newImageMetaData));
         } catch (Exception e) {
@@ -169,20 +171,20 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public String deleteImage(String image) {
-        LOG.info("Received request to delete image from S3 bucket");
+        log.info("Received request to delete image from S3 bucket");
         awsS3Client.deleteObject(
                 bucketName,
                 image + ".png"
         );
         List<ImageMetaData> imagesMetaData = imagesRepository.findByName(image);
         imagesMetaData.stream().forEach((imageMetaData -> imagesRepository.deleteByName(imageMetaData.getName())));
-        LOG.info("Completed request to delete image from S3 bucket");
+        log.info("Completed request to delete image from S3 bucket");
         return "Delete operation completed.";
     }
 
     @Override
     public byte[] downloadImage(String image) {
-        LOG.info("Received request to download image from S3 bucket");
+        log.info("Received request to download image from S3 bucket");
         S3ObjectInputStream s3ObjectInputStream =
                 awsS3Client.getObject(
                         bucketName,
@@ -192,50 +194,50 @@ public class AppServiceImpl implements AppService {
             byte[] imageContent = IOUtils.toByteArray(s3ObjectInputStream);
             return imageContent;
         } catch (IOException e) {
-            LOG.error("Error downloading image from S3 bucket", e);
+            log.error("Error downloading image from S3 bucket", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error downloading file");
         }
     }
 
     @Override
     public List<ImageMetaData> getAllImagesMetaData() {
-        LOG.info("Received request to get all images metaData");
+        log.info("Received request to get all images metaData");
         return imagesRepository.findAll();
     }
 
     @Override
     public List<ImageMetaData> getRandomImageMetaData() {
-        LOG.info("Received request to get a random image metaData");
+        log.info("Received request to get a random image metaData");
         return imagesRepository.randomImage();
     }
 
     @Override
     public String addSubscriptionToTopic(String email) {
         try {
-            LOG.info("Received request to subscribe to SNS topic");
+            log.info("Received request to subscribe to SNS topic");
             SubscribeRequest subscribeRequest = new SubscribeRequest()
                     .withTopicArn(snsTopicArn)
                     .withProtocol("email")
                     .withEndpoint(email);
             amazonSNSClient.subscribe(subscribeRequest);
         } catch (AmazonSNSException e) {
-            LOG.error("Error when trying to subscribe to SNS topic", e);
+            log.error("Error when trying to subscribe to SNS topic", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error during subscribing process");
         }
-        LOG.info("Successfully subscribed to SNS topic");
+        log.info("Successfully subscribed to SNS topic");
         return "Successfully subscribed";
     }
 
     @Override
     public String deleteSubscriptionFromTopic(String email) {
-        LOG.info("Received request to unsubscribe from SNS topic");
+        log.info("Received request to unsubscribe from SNS topic");
             var currentSubscribers = amazonSNSClient
                     .listSubscriptionsByTopic(snsTopicArn);
                currentSubscribers.getSubscriptions()
                     .stream()
                     .filter(subscription -> subscription.getEndpoint().equals(email))
                     .forEach(subscription -> unsubscribeFromTopic(subscription.getSubscriptionArn()));
-            LOG.info("Successfully unsubscribed from SNS topic");
+            log.info("Successfully unsubscribed from SNS topic");
             return "Successfully unsubscribed";
     }
 
@@ -245,7 +247,7 @@ public class AppServiceImpl implements AppService {
                     new UnsubscribeRequest(subscriptionArn);
             amazonSNSClient.unsubscribe(unsubscribeRequest);
         } catch (AmazonSNSException e) {
-            LOG.error("Error when trying to unsubscribe from SNS topic", e);
+            log.error("Error when trying to unsubscribe from SNS topic", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error during unsubscribing process");
         }
     }
@@ -284,7 +286,7 @@ public class AppServiceImpl implements AppService {
     }
     @Override
     public void sendMessagesToSNSTopic(String message) {
-        PublishRequest publishRequest = new PublishRequest(snsTopicArn, message,"Image uploaded");
+        PublishRequest publishRequest = new PublishRequest(snsTopicArn, message, "Image uploaded");
         amazonSNSClient.publish(publishRequest);
     }
 
@@ -296,18 +298,19 @@ public class AppServiceImpl implements AppService {
             InvokeResult invokeResult = awsLambda.invoke(invokeRequest);
             return new String(invokeResult.getPayload().array(), StandardCharsets.UTF_8);
         } catch (ServiceException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error during lambda function execution");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error during lambda function execution");
         }
     }
 
     private  String formatMessage(ImageMetaData imageMetaData) {
-        String downloadImageUrl = linkTo(methodOn(Controller.class)
+        String downloadImageUrl = linkTo(methodOn(ImagesController.class)
                 .downloadImage(imageMetaData.getName()))
                 .toString();
         return "New image uploaded:" + "\n"
         + "- Image Name: " + imageMetaData.getName() + "\n"
-        + "- Image Size: " + imageMetaData.getImage_size() + " bytes\n"
-        + "- Image extension: " + imageMetaData.getFile_ext() + "\n"
+        + "- Image Size: " + imageMetaData.getImageSize() + " bytes\n"
+        + "- Image extension: " + imageMetaData.getFileExtension() + "\n"
         + "- Download image: " + downloadImageUrl;
     }
 }

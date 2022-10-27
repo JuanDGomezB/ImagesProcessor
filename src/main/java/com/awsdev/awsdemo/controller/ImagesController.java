@@ -1,29 +1,32 @@
-package com.awsdev.awsDemo.controller;
+package com.awsdev.awsdemo.controller;
 
-import com.awsdev.awsDemo.models.AwsMetaData;
-import com.awsdev.awsDemo.models.ImageMetaData;
-import com.awsdev.awsDemo.service.AppService;
+import com.awsdev.awsdemo.models.AwsMetaData;
+import com.awsdev.awsdemo.models.ImageMetaData;
+import com.awsdev.awsdemo.service.AppService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * ImagesController REST.
+ */
 @RestController
 @RequestMapping(produces = "application/json")
-public class Controller {
+public class ImagesController {
 
     @Autowired
     private AppService appService;

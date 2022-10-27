@@ -2,6 +2,8 @@ plugins {
 	id 'org.springframework.boot' version '2.7.0'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+	id 'jacoco'
+	id 'checkstyle'
 }
 
 group = 'com.awsdev'
@@ -16,11 +18,12 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'junit:junit:4.13.1'
 	compileOnly 'org.projectlombok:lombok:1.18.24'
 	annotationProcessor 'org.projectlombok:lombok:1.18.24'
 	implementation 'org.springframework.cloud:spring-cloud-aws-context:2.2.6.RELEASE'
 	implementation 'org.springframework.cloud:spring-cloud-aws-autoconfigure:2.2.6.RELEASE'
-	implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.837')
+	implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.322')
 	implementation 'com.amazonaws:aws-java-sdk-ec2'
 	implementation 'com.amazonaws:aws-java-sdk-s3'
 	implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
@@ -35,14 +38,48 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-lambda
 	implementation group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: '1.12.270'
 	// https://mvnrepository.com/artifact/org.springframework/spring-beans
-	implementation 'org.springframework:spring-beans:3.0.5.RELEASE'
+	//implementation 'org.springframework:spring-beans:3.0.5.RELEASE'
+	// https://mvnrepository.com/artifact/com.google.code.gson/gson
+	implementation 'com.google.code.gson:gson:2.10'
 
 }
+//tasks
+jacoco {
+	toolVersion = "0.8.8"
+	reportsDir = file("$buildDir/reports/jacoco")
+}
 
-tasks.named('test') {
+test {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.95
+			}
+		}
+	}
+}
+
+checkstyle {
+	toolVersion '7.8.1'
+	configFile file("config/checkstyle/checkstyle.xml")
+}
+
+checkstyleMain {
+	source ='src/main/java'
+}
+checkstyleTest {
+	source ='src/test/java'
 }
 
 bootJar {
 	launchScript()
 }
+
+check.dependsOn jacocoTestCoverageVerification
