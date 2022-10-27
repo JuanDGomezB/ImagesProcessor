@@ -143,4 +143,28 @@ public class ImagesControllerTest {
                 .andExpect(status().is(200))
                 .andExpect(content().string(mockResponse));
     }
+
+    @Test
+    public void unsubscribeToSnSTopicRequest() throws Exception {
+        Mockito.when(appService.deleteSubscriptionFromTopic(anyString()))
+                .thenReturn("Successfully unsubscribed");
+
+        var mockResponse = "{\"Operation\":\"Successfully unsubscribed\",\"email\":\"123@abc.com\"}";
+        mockMvc.perform(MockMvcRequestBuilders.delete("/unsubscribe")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content("123@abc.com"))
+                .andExpect(status().is(200))
+                .andExpect(content().string(mockResponse));
+    }
+
+    @Test
+    public void triggerLambdaFunctionRequest() throws Exception {
+        Mockito.when(appService.triggerLambdaFunction())
+                .thenReturn("Lambda executed");
+
+        var mockResponse = "{\"Operation\":\"Lambda executed\"}";
+        mockMvc.perform(MockMvcRequestBuilders.get("/trigger"))
+                .andExpect(status().is(200))
+                .andExpect(content().string(mockResponse));
+    }
 }
